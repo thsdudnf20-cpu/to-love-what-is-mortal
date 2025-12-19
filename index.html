@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>루피의 기록</title>
+
+<style>
+body {
+  margin: 0;
+  background: radial-gradient(
+    circle at center,
+    #ffffff 0%,
+    #eaf4ff 40%,
+    #dbeeff 70%,
+    #cfe6ff 100%
+  );
+  color: #222;
+  font-family: -apple-system, BlinkMacSystemFont,
+               "Helvetica Neue", "Apple SD Gothic Neo",
+               "Noto Sans KR", Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* 메리 올리버 시 */
+#poem {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  text-align: center;
+  opacity: 0.35;
+  filter: blur(0.4px);
+  animation: breathe 6s infinite alternate;
+  line-height: 1.6;
+}
+
+@keyframes breathe {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(4px); }
+}
+
+/* 떠다니는 텍스트 */
+.text-node {
+  position: absolute;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  font-size: 14px;
+}
+
+.text-node:hover {
+  opacity: 1;
+}
+
+/* 사진 컨테이너 */
+#photo-container {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* 사진 */
+.photo {
+  width: 220px;
+  cursor: pointer;
+}
+
+/* 사진 위 텍스트 입력 */
+input {
+  position: absolute;
+  background: transparent;
+  border: none;
+  color: #222;
+  outline: none;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="poem">
+  세상을 살기 위해서는 세 가지를 할 수 있어야 한다.<br>
+  To live in this world, you must be able to do three things:<br><br>
+
+  죽을 수밖에 없는 것들을 사랑하기.<br>
+  to love what is mortal;<br><br>
+
+  자신의 삶이 그것들에 의지하고 있음을 깨닫고 그들을 가슴 깊이 끌어안기.<br>
+  to hold it against your bones knowing your own life depends on it;<br><br>
+
+  그리고 놓아줄 때가 되면 놓아주기.<br>
+  and, when the time comes to let go, to let go.<br><br>
+
+  — Mary Oliver
+</div>
+
+<script>
+let stage = 0;
+const maxStage = 5;
+
+/* 루피의 기억 */
+const memoryTexts = [
+  "12.3", "11.25", "01.08", "03.14", "06.22", "09.30",
+  "토했다", "아픈 날", "병원 갔다", "건강검진", "예방접종",
+  "엄마랑 같이 산책", "공원에서 뛰어놀았어", "비 오는 날", "눈을 먹었어",
+  "새 간식 먹었어", "털이 엄청 빠진다",
+  "소파에서 낮잠", "같이 TV 봤어", "같이 자자고 했어",
+  "문 앞에서 기다렸어", "꼬리 흔들며 반겨줬어",
+  "발톱 깎는 날", "목욕했어",
+  "친구 강아지 만났어",
+  "울면서 잠꼬대 했어", "귀여운 하품",
+  "배 긁어달라고 했어",
+  "내 신발 물고 놀았어",
+  "쉬지도 않고 계속 뛰어다녀"
+];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function createText(text) {
+  const div = document.createElement("div");
+  div.className = "text-node";
+  div.innerText = text;
+  div.style.left = random(50, window.innerWidth - 150) + "px";
+  div.style.top = random(120, window.innerHeight - 120) + "px";
+
+  div.onclick = () => {
+    div.remove();
+    nextStage();
+  };
+
+  document.body.appendChild(div);
+}
+
+function nextStage() {
+  stage++;
+  if (stage < maxStage) {
+    for (let i = 0; i < 5; i++) {
+      createText(
+        memoryTexts[Math.floor(Math.random() * memoryTexts.length)]
+      );
+    }
+  } else {
+    clearTexts();
+    showPhotos();
+  }
+}
+
+/* 초기 텍스트 */
+for (let i = 0; i < 10; i++) {
+  createText(
+    memoryTexts[Math.floor(Math.random() * memoryTexts.length)]
+  );
+}
+
+/* 모든 텍스트 제거 */
+function clearTexts() {
+  document.querySelectorAll(".text-node").forEach(el => el.remove());
+  const poem = document.getElementById("poem");
+  if (poem) poem.remove();
+}
+
+/* 사진 2x2 */
+function showPhotos() {
+  const container = document.createElement("div");
+  container.id = "photo-container";
+
+  const images = ["dog1.jpg", "dog2.jpg", "dog3.jpg", "dog4.jpg"];
+
+  images.forEach(src => {
+    const img = document.createElement("img");
+    img.src = "images/" + src;
+    img.className = "photo";
+
+    img.onclick = () => {
+      const rect = img.getBoundingClientRect();
+      const input = document.createElement("input");
+
+      input.style.left = rect.left + 10 + "px";
+      input.style.top = rect.top + 10 + "px";
+      input.style.width = rect.width - 20 + "px";
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          input.blur();
+        }
+      });
+
+      document.body.appendChild(input);
+      input.focus();
+    };
+
+    container.appendChild(img);
+  });
+
+  document.body.appendChild(container);
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
